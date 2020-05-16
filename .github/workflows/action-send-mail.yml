@@ -1,29 +1,28 @@
-name: 'GitHub Actions Weather Bot'
+    
+name: PHP Composer
 
 on:
   push:
-  schedule:
-    - cron: '0 21 * * *'
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
-  bot:
+  build:
+
     runs-on: ubuntu-latest
+
     steps:
-      - name: 'Checkout codes'
-        uses: actions/checkout@v1
-      - name: 'Get Weather'
-        run: bash ./weather.sh
-      - name: 'Get Date'
-        run: echo "::set-env name=REPORT_DATE::$(TZ=':Asia/Shanghai' date '+%Y-%m-%d %T')"
-      - name: 'Send mail'
-        uses: lfkjml.github.io/action-send-mail@master
-        with:
-          server_address: smtp.163.com
-          server_port: 465
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-          subject: Shanghai Weather Report (${{env.REPORT_DATE}})
-          body: file://result.html
-          to: 810445061@qq.com
-          from: GitHub Actions
-          content_type: text/html
+    - uses: actions/checkout@v2
+
+    - name: Validate composer.json and composer.lock
+      run: composer validate
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress
+
+    # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
+    # Docs: https://getcomposer.org/doc/articles/scripts.md
+
+    # - name: Run test suite
+    #   run: composer run-script test
